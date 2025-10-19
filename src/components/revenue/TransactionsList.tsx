@@ -1,7 +1,6 @@
 import { ChevronDown, Download } from "lucide-react";
 import { TransactionCard } from "./TransactionCard";
 import type { Transaction } from "@/types/api";
-import { RecieptIcon } from "@/assets/svg";
 import { NoTransactions } from "./NoTransactions";
 
 interface TransactionsListProps {
