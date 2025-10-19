@@ -28,7 +28,7 @@ export function WalletBalanceChart({
   chartData,
 }: WalletBalanceChartProps) {
   return (
-    <div className="bg-white rounded-2xl p-6">
+    <div className="bg-white rounded-2xl p-4 sm:p-6">
       <div className="flex items-end gap-x-10 mb-6">
         <div>
           <p className="text-sm text-muted-foreground mb-1">
@@ -54,7 +54,10 @@ export function WalletBalanceChart({
       </div>
 
       <div className="pb-6">
-        <ChartContainer config={chartConfig} className="h-[300px] w-full">
+        <ChartContainer
+          config={chartConfig}
+          className="h-[250px] sm:h-[300px] w-full"
+        >
           <LineChart
             accessibilityLayer
             data={chartData}

@@ -61,9 +61,9 @@ export function Revenue() {
         onFiltersChange={setFilters}
       />
 
-      <div className="p-8 bg-white min-h-full">
-        <div className="max-w-[1400px] mx-auto space-y-6">
-          <div className="grid grid-cols-[1fr_320px] gap-6">
+      <div className="p-4 sm:p-6 lg:p-8 bg-white min-h-full">
+        <div className="max-w-[1400px] mx-auto space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 sm:gap-6">
             <WalletBalanceChart
               wallet={wallet}
               walletLoading={walletLoading}

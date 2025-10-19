@@ -26,7 +26,7 @@ export function StatsGrid({ wallet }: StatsGridProps) {
   ];
 
   return (
-    <div className="space-y-6 p-2">
+    <div className="space-y-2 p-2">
       {stats.map((stat) => (
         <StatCard key={stat.title} title={stat.title} value={stat.value} />
       ))}
