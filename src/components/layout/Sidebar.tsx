@@ -1,20 +1,50 @@
-import { RotateCcw, Home, Wallet, FileText } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+const sidebarItems = [
+  {
+    image: "/src/assets/link.png",
+    label: "Link in Bio",
+  },
+  {
+    image: "/src/assets/store.png",
+    label: "Store",
+  },
+  {
+    image: "/src/assets/media-kit.png",
+    label: "Media Kit",
+  },
+  {
+    image: "/src/assets/invoicing.png",
+    label: "Invoicing",
+  },
+];
 
 export function Sidebar() {
   return (
-    <aside className="w-16 border-r border-border bg-background flex flex-col items-center py-6 gap-4">
-      <button className="w-10 h-10 rounded-lg bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors">
-        <RotateCcw className="w-5 h-5 text-muted-foreground" />
-      </button>
-      <button className="w-10 h-10 rounded-lg hover:bg-muted flex items-center justify-center transition-colors">
-        <Home className="w-5 h-5 text-muted-foreground" />
-      </button>
-      <button className="w-10 h-10 rounded-lg hover:bg-muted flex items-center justify-center transition-colors">
-        <Wallet className="w-5 h-5 text-muted-foreground" />
-      </button>
-      <button className="w-10 h-10 rounded-lg hover:bg-muted flex items-center justify-center transition-colors">
-        <FileText className="w-5 h-5 text-muted-foreground" />
-      </button>
+    <aside className="fixed left-4 top-[20%] bg-transparent flex flex-col items-center py-5 px-4 gap-6 rounded-full shadow-lg">
+      <TooltipProvider>
+        {sidebarItems.map((item) => (
+          <Tooltip key={item.label}>
+            <TooltipTrigger asChild>
+              <button className="w-6 h-6 rounded-lg hover:bg-muted flex items-center justify-center transition-colors cursor-pointer">
+                <img
+                  src={item.image}
+                  alt={item.label}
+                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-50"
+                />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <p>{item.label}</p>
+            </TooltipContent>
+          </Tooltip>
+        ))}
+      </TooltipProvider>
     </aside>
   );
 }

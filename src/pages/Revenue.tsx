@@ -63,12 +63,31 @@ export function Revenue() {
     },
   ];
 
+  const stats = [
+    {
+      title: "Available Balance",
+      value: 120500,
+    },
+    {
+      title: "Total Payout",
+      value: 55080,
+    },
+    {
+      title: "Total Revenue",
+      value: 175580,
+    },
+    {
+      title: "Pending Payout",
+      value: 0,
+    },
+  ];
+
   return (
-    <div className="p-8 bg-[#FAFAFA] min-h-full">
-      <div className="max-w-[1400px] mx-auto grid grid-cols-[1fr_320px] gap-6">
-        <div className="space-y-6">
-          <div className="bg-white rounded-2xl p-6 border border-border">
-            <div className="flex items-start justify-between mb-6">
+    <div className="p-8 bg-white min-h-full">
+      <div className="max-w-[1400px] mx-auto space-y-6">
+        <div className="grid grid-cols-[1fr_320px] gap-6">
+          <div className="bg-white rounded-2xl p-6">
+            <div className="flex items-end gap-x-10 mb-6">
               <div>
                 <p className="text-sm text-muted-foreground mb-1">
                   Available Balance
@@ -113,119 +132,100 @@ export function Revenue() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 border border-border">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-lg font-semibold">24 Transactions</h3>
-                <p className="text-sm text-muted-foreground">
-                  Your transactions for the last 7 days
+          <div className="space-y-6 p-2">
+            {stats.map((stat) => (
+              <div className="bg-white rounded-2xl  ">
+                <div className="flex items-start justify-between mb-2">
+                  <p className="text-sm text-muted-foreground">{stat.title}</p>
+                  <button className="text-muted-foreground hover:text-foreground">
+                    <Info className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-2xl font-semibold">
+                  USD{" "}
+                  {stat.value?.toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
                 </p>
               </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setIsFilterOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm hover:bg-muted transition-colors"
-                >
-                  Filter
-                  <ChevronDown className="w-4 h-4" />
-                </button>
-                <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm hover:bg-muted transition-colors">
-                  Export list
-                  <Download className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {transactions.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  className="flex items-center justify-between py-3 px-4 rounded-xl hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        transaction.status === "success"
-                          ? "bg-[#E8F5E9]"
-                          : transaction.status === "pending"
-                          ? "bg-[#FFF3E0]"
-                          : "bg-[#FFE8DC]"
-                      }`}
-                    >
-                      {transaction.status === "success" ? (
-                        <Check className="w-5 h-5 text-[#4CAF50]" />
-                      ) : (
-                        <TrendingUp className="w-5 h-5 text-[#FF9B71]" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">{transaction.title}</p>
-                      <p
-                        className={`text-sm ${
-                          transaction.status === "pending"
-                            ? "text-[#FF9800]"
-                            : transaction.status === "withdrawal"
-                            ? "text-[#4CAF50]"
-                            : "text-muted-foreground"
-                        }`}
-                      >
-                        {transaction.sender}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-sm">
-                      USD {transaction.amount.toFixed(2)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {transaction.date}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="bg-white rounded-2xl p-5 border border-border">
-            <div className="flex items-start justify-between mb-2">
-              <p className="text-sm text-muted-foreground">Ledger Balance</p>
-              <button className="text-muted-foreground hover:text-foreground">
-                <Info className="w-4 h-4" />
+        {/* Transactions */}
+        <div className="bg-white rounded-2xl p-6 ">
+          <div className="fbc pb-5 mb-6 border-b border-border">
+            <div>
+              <h3 className="text-lg font-semibold">24 Transactions</h3>
+              <p className="text-sm text-muted-foreground">
+                Your transactions for the last 7 days
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsFilterOpen(true)}
+                className="flex bg-gray-100 items-center gap-2 px-4 py-2 rounded-full  text-sm hover:bg-muted transition-colors cursor-pointer"
+              >
+                Filter
+                <ChevronDown className="w-4 h-4" />
+              </button>
+
+              <button className="flex bg-gray-100 items-center gap-2 px-4 py-2 rounded-full  text-sm hover:bg-muted transition-colors cursor-pointer">
+                Export list
+                <Download className="w-4 h-4" />
               </button>
             </div>
-            <p className="text-2xl font-semibold">USD 0.00</p>
           </div>
 
-          <div className="bg-white rounded-2xl p-5 border border-border">
-            <div className="flex items-start justify-between mb-2">
-              <p className="text-sm text-muted-foreground">Total Payout</p>
-              <button className="text-muted-foreground hover:text-foreground">
-                <Info className="w-4 h-4" />
-              </button>
-            </div>
-            <p className="text-2xl font-semibold">USD 55,080.00</p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-5 border border-border">
-            <div className="flex items-start justify-between mb-2">
-              <p className="text-sm text-muted-foreground">Total Revenue</p>
-              <button className="text-muted-foreground hover:text-foreground">
-                <Info className="w-4 h-4" />
-              </button>
-            </div>
-            <p className="text-2xl font-semibold">USD 175,580.00</p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-5 border border-border">
-            <div className="flex items-start justify-between mb-2">
-              <p className="text-sm text-muted-foreground">Pending Payout</p>
-              <button className="text-muted-foreground hover:text-foreground">
-                <Info className="w-4 h-4" />
-              </button>
-            </div>
-            <p className="text-2xl font-semibold">USD 0.00</p>
+          <div className="space-y-3">
+            {transactions.map((transaction) => (
+              <div
+                key={transaction.id}
+                className="flex items-center justify-between py-3 px-4 rounded-xl hover:bg-muted/50 transition-colors"
+              >
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      transaction.status === "success"
+                        ? "bg-[#E8F5E9]"
+                        : transaction.status === "pending"
+                        ? "bg-[#FFF3E0]"
+                        : "bg-[#FFE8DC]"
+                    }`}
+                  >
+                    {transaction.status === "success" ? (
+                      <Check className="w-5 h-5 text-[#4CAF50]" />
+                    ) : (
+                      <TrendingUp className="w-5 h-5 text-[#FF9B71]" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">{transaction.title}</p>
+                    <p
+                      className={`text-sm ${
+                        transaction.status === "pending"
+                          ? "text-[#FF9800]"
+                          : transaction.status === "withdrawal"
+                          ? "text-[#4CAF50]"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {transaction.sender}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold text-sm">
+                    USD {transaction.amount.toFixed(2)}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {transaction.date}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

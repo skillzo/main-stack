@@ -1,9 +1,8 @@
-import { ReactNode } from "react";
 import { Navbar } from "./Navbar";
 import { Sidebar } from "./Sidebar";
 
 interface LayoutProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 export function Layout({ children }: LayoutProps) {
