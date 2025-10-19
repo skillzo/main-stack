@@ -26,7 +26,7 @@ const sidebarItems = [
 
 export function Sidebar() {
   return (
-    <aside className="hidden  fixed left-4 top-[20%] bg-transparent md:flex flex-col items-center py-5 px-4 gap-6 rounded-full shadow-lg">
+    <aside className="hidden fixed left-4 top-[25%] bg-transparent md:flex flex-col items-center py-5 px-4 gap-6 rounded-full shadow-lg">
       <TooltipProvider>
         {sidebarItems.map((item) => (
           <Tooltip key={item.label}>

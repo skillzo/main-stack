@@ -51,6 +51,7 @@ export function filterTransactions(
     const hasSelectedStatuses = Object.values(filters.transactionStatuses).some(
       Boolean
     );
+
     if (hasSelectedStatuses) {
       const statusMap: Record<
         string,
@@ -63,6 +64,10 @@ export function filterTransactions(
 
       const statusKey = statusMap[transaction.status];
       if (statusKey && !filters.transactionStatuses[statusKey]) {
+        return false;
+      }
+      // If transaction status is not mapped and we have selected statuses, exclude it
+      if (!statusKey) {
         return false;
       }
     }

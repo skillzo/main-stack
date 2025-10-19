@@ -1,13 +1,6 @@
-import {
-  Settings,
-  Receipt,
-  Gift,
-  Grid3x3,
-  Bug,
-  UserCog,
-  LogOut,
-} from "lucide-react";
+import { Settings, Gift, Bug, UserCog, LogOut } from "lucide-react";
 import type { User } from "@/types/api";
+import { AppsIcon, RecieptIcon } from "@/assets/svg";
 
 interface ProfileMenuProps {
   isOpen: boolean;
@@ -32,9 +25,9 @@ export function ProfileMenu({ isOpen, user, loading }: ProfileMenuProps) {
 
   const menuItems = [
     { id: 1, icon: Settings, label: "Settings" },
-    { id: 2, icon: Receipt, label: "Purchase History" },
+    { id: 2, icon: RecieptIcon, label: "Purchase History" },
     { id: 3, icon: Gift, label: "Refer and Earn" },
-    { id: 4, icon: Grid3x3, label: "Integrations" },
+    { id: 4, icon: AppsIcon, label: "Integrations" },
     { id: 5, icon: Bug, label: "Report Bug" },
     { id: 6, icon: UserCog, label: "Switch Account" },
     { id: 7, icon: LogOut, label: "Sign Out" },
