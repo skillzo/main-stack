@@ -1,6 +1,12 @@
-import { Bell, MessageSquareText, TextAlignJustify } from "lucide-react";
+import {
+  Bell,
+  MessageSquareText,
+  TextAlignJustify,
+  ChevronDown,
+} from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { ProfileMenu } from "../ProfileMenu";
+import { AppsDropdown } from "../AppsDropdown";
 import Logo from "../common/Logo";
 import {
   AnalyticsIcon,
@@ -11,9 +17,35 @@ import {
 } from "../../assets/svg";
 import { useUser } from "@/hooks/useUser";
 
+const navlinks = [
+  {
+    label: "Home",
+    icon: HomeIcon,
+    href: "#",
+  },
+  {
+    label: "Analytics",
+    icon: AnalyticsIcon,
+    href: "#",
+  },
+  {
+    label: "Revenue",
+    icon: WalletIcon,
+    href: "/",
+  },
+  {
+    label: "CRM",
+    icon: CRMIcon,
+    href: "#",
+  },
+];
+
 export function Navbar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isAppsOpen, setIsAppsOpen] = useState(false);
+  const [showSegmentedControl, setShowSegmentedControl] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+  const appsRef = useRef<HTMLDivElement>(null);
   const pathname = window.location.pathname;
   const { user, loading, getInitials } = useUser();
 
@@ -25,44 +57,19 @@ export function Navbar() {
       ) {
         setIsProfileOpen(false);
       }
+      if (appsRef.current && !appsRef.current.contains(event.target as Node)) {
+        setIsAppsOpen(false);
+      }
     };
 
-    if (isProfileOpen) {
+    if (isProfileOpen || isAppsOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isProfileOpen]);
-
-  const navlinks = [
-    {
-      label: "Home",
-      icon: HomeIcon,
-      href: "#",
-    },
-    {
-      label: "Analytics",
-      icon: AnalyticsIcon,
-      href: "#",
-    },
-    {
-      label: "Revenue",
-      icon: WalletIcon,
-      href: "/",
-    },
-    {
-      label: "CRM",
-      icon: CRMIcon,
-      href: "#",
-    },
-    {
-      label: "Apps",
-      icon: AppsIcon,
-      href: "#",
-    },
-  ];
+  }, [isProfileOpen, isAppsOpen]);
 
   return (
     <nav className="border-b border-border bg-background px-6 py-3 mx-auto w-[98%] rounded-full shadow-sm">
@@ -70,6 +77,7 @@ export function Navbar() {
         <Logo />
 
         <div className="flex items-center gap-8">
+          {/* Regular nav links */}
           {navlinks.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -87,6 +95,50 @@ export function Navbar() {
               </a>
             );
           })}
+
+          {!showSegmentedControl && (
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setShowSegmentedControl(!showSegmentedControl);
+              }}
+              className={`flex items-center gap-2 px-4 py-2 text-sm rounded-full transition-colors text-muted-foreground hover:bg-muted `}
+            >
+              <AppsIcon className="w-5 h-5" />
+              Apps
+            </a>
+          )}
+
+          {/* Segmented control for Apps */}
+          {showSegmentedControl && (
+            <div
+              className="flex bg-black rounded-full p-1 relative"
+              ref={appsRef}
+            >
+              <button
+                onClick={() => {
+                  setShowSegmentedControl(!showSegmentedControl);
+                }}
+                className="flex items-center gap-2 px-4 py-2 text-sm text-white hover:bg-white/10 rounded-full transition-colors"
+              >
+                <AppsIcon className="w-5 h-5 text-black bg-white rounded-full p-1" />
+                Apps
+              </button>
+
+              <div className="w-px h-6 bg-white/20 mx-1"></div>
+
+              <button
+                onClick={() => setIsAppsOpen(!isAppsOpen)}
+                className="flex items-center gap-2 px-4 py-2 text-sm text-white hover:bg-white/10 rounded-full transition-colors"
+              >
+                Link in Bio
+                <ChevronDown className="w-4 h-4" />
+              </button>
+
+              <AppsDropdown isOpen={isAppsOpen} />
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-3">

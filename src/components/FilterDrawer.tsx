@@ -9,86 +9,89 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
+import { type FilterState } from "@/types/filter";
+import { getQuickFilterDateRange } from "@/lib/filterUtils";
 
 interface FilterDrawerProps {
   isOpen: boolean;
   onClose: () => void;
+  filters: FilterState;
+  onFiltersChange: (filters: FilterState) => void;
 }
 
-export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
+export function FilterDrawer({
+  isOpen,
+  onClose,
+  filters,
+  onFiltersChange,
+}: FilterDrawerProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [selectedQuickFilter, setSelectedQuickFilter] = useState<string | null>(
-    null
-  );
-  const [startDate, setStartDate] = useState<Date | undefined>(
-    new Date("2023-07-17")
-  );
-  const [endDate, setEndDate] = useState<Date | undefined>(
-    new Date("2023-08-17")
-  );
   const [isTransactionTypeOpen, setIsTransactionTypeOpen] = useState(false);
   const [isTransactionStatusOpen, setIsTransactionStatusOpen] = useState(false);
-
-  const [transactionTypes, setTransactionTypes] = useState({
-    storeTransactions: true,
-    getTipped: true,
-    withdrawals: true,
-    chargebacks: true,
-    cashbacks: true,
-    referEarn: true,
-  });
-
-  const [transactionStatuses, setTransactionStatuses] = useState({
-    successful: true,
-    pending: true,
-    failed: true,
-  });
+  const [localFilters, setLocalFilters] = useState<FilterState>(filters);
 
   useEffect(() => {
     if (isOpen) {
       setIsVisible(true);
       setTimeout(() => setIsAnimating(true), 10);
+      setLocalFilters(filters);
     } else {
       setIsAnimating(false);
       setTimeout(() => setIsVisible(false), 300);
     }
-  }, [isOpen]);
+  }, [isOpen, filters]);
 
   if (!isVisible) return null;
 
   const quickFilters = ["Today", "Last 7 days", "This month", "Last 3 months"];
 
-  const toggleTransactionType = (key: keyof typeof transactionTypes) => {
-    setTransactionTypes((prev) => ({ ...prev, [key]: !prev[key] }));
+  const toggleTransactionType = (
+    key: keyof FilterState["transactionTypes"]
+  ) => {
+    setLocalFilters({
+      ...localFilters,
+      transactionTypes: {
+        ...localFilters.transactionTypes,
+        [key]: !localFilters.transactionTypes[key],
+      },
+    });
   };
 
-  const toggleTransactionStatus = (key: keyof typeof transactionStatuses) => {
-    setTransactionStatuses((prev) => ({ ...prev, [key]: !prev[key] }));
+  const toggleTransactionStatus = (
+    key: keyof FilterState["transactionStatuses"]
+  ) => {
+    setLocalFilters({
+      ...localFilters,
+      transactionStatuses: {
+        ...localFilters.transactionStatuses,
+        [key]: !localFilters.transactionStatuses[key],
+      },
+    });
   };
 
   const getTransactionTypeLabel = () => {
-    const selected = Object.entries(transactionTypes)
+    const selected = Object.entries(localFilters.transactionTypes)
       .filter(([_, isSelected]) => isSelected)
       .map(([key]) => {
         const labels: Record<string, string> = {
-          storeTransactions: "Store Transactions",
-          getTipped: "Get Tipped",
+          digitalProducts: "Digital Products",
+          coffee: "Coffee",
+          webinars: "Webinars",
           withdrawals: "Withdrawals",
-          chargebacks: "Chargebacks",
-          cashbacks: "Cashbacks",
-          referEarn: "Refer & Earn",
+          other: "Other",
         };
         return labels[key];
       });
 
-    return selected.length === 6
-      ? "Store Transactions, Get Tipped, Withdrawals, Chargebacks, Ca..."
-      : selected.join(", ");
+    if (selected.length === 0) return "Select transaction types";
+    if (selected.length === 5) return "All transaction types";
+    if (selected.length <= 2) return selected.join(", ");
+    return `${selected.length} selected`;
   };
 
   const getTransactionStatusLabel = () => {
-    const selected = Object.entries(transactionStatuses)
+    const selected = Object.entries(localFilters.transactionStatuses)
       .filter(([_, isSelected]) => isSelected)
       .map(([key]) => {
         const labels: Record<string, string> = {
@@ -99,29 +102,69 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
         return labels[key];
       });
 
-    if (selected.length === 0) return "Select status";
-    if (selected.length === Object.keys(transactionStatuses).length)
+    if (selected.length === 0) return "Select transaction status";
+    if (
+      selected.length === Object.keys(localFilters.transactionStatuses).length
+    )
       return "All statuses";
     if (selected.length <= 2) return selected.join(", ");
     return `${selected.length} selected`;
   };
 
   const handleClear = () => {
-    setSelectedQuickFilter(null);
-    setTransactionTypes({
-      storeTransactions: true,
-      getTipped: true,
-      withdrawals: true,
-      chargebacks: true,
-      cashbacks: true,
-      referEarn: true,
-    });
-    setTransactionStatuses({
-      successful: true,
-      pending: true,
-      failed: true,
+    setLocalFilters({
+      quickFilter: null,
+      dateRange: {
+        startDate: undefined,
+        endDate: undefined,
+      },
+      transactionTypes: {
+        digitalProducts: false,
+        coffee: false,
+        webinars: false,
+        withdrawals: false,
+        other: false,
+      },
+      transactionStatuses: {
+        successful: false,
+        pending: false,
+        failed: false,
+      },
     });
   };
+
+  const handleQuickFilterChange = (filter: string) => {
+    const dateRange = getQuickFilterDateRange(filter);
+    setLocalFilters({
+      ...localFilters,
+      quickFilter: filter,
+      dateRange,
+    });
+  };
+
+  const handleDateChange = (
+    type: "startDate" | "endDate",
+    date: Date | undefined
+  ) => {
+    setLocalFilters({
+      ...localFilters,
+      dateRange: {
+        ...localFilters.dateRange,
+        [type]: date,
+      },
+      quickFilter: null,
+    });
+  };
+
+  const handleApply = () => {
+    onFiltersChange(localFilters);
+    onClose();
+  };
+
+  const hasChanges = JSON.stringify(localFilters) !== JSON.stringify(filters);
+
+  console.log("localFilters", localFilters);
+  console.log("filters", filters);
 
   return (
     <>
@@ -151,9 +194,9 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
             {quickFilters.map((filter) => (
               <button
                 key={filter}
-                onClick={() => setSelectedQuickFilter(filter)}
+                onClick={() => handleQuickFilterChange(filter)}
                 className={`px-5 py-2.5 border border-border rounded-full text-xs md:text-sm transition-colors cursor-pointer ${
-                  selectedQuickFilter === filter
+                  localFilters.quickFilter === filter
                     ? "bg-foreground text-background"
                     : "text-foreground hover:bg-[#EBEBEB]"
                 }`}
@@ -163,6 +206,7 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
             ))}
           </div>
 
+          {/* Date Range */}
           <div className="">
             <h3 className="text-base font-semibold mb-3">Date Range</h3>
             <div className="grid grid-cols-2 gap-4">
@@ -173,14 +217,16 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
                     className="w-full justify-start text-left font-normal bg-[#F5F5F5] border-none hover:bg-[#EBEBEB] rounded-xl px-4 py-3 h-auto"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? format(startDate, "PPP") : "Pick a date"}
+                    {localFilters.dateRange.startDate
+                      ? format(localFilters.dateRange.startDate, "PPP")
+                      : "Pick a date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={startDate}
-                    onSelect={setStartDate}
+                    selected={localFilters.dateRange.startDate}
+                    onSelect={(date) => handleDateChange("startDate", date)}
                     initialFocus
                   />
                 </PopoverContent>
@@ -193,14 +239,16 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
                     className="w-full justify-start text-left font-normal bg-[#F5F5F5] border-none hover:bg-[#EBEBEB] rounded-xl px-4 py-3 h-auto"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? format(endDate, "PPP") : "Pick a date"}
+                    {localFilters.dateRange.endDate
+                      ? format(localFilters.dateRange.endDate, "PPP")
+                      : "Pick a date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={endDate}
-                    onSelect={setEndDate}
+                    selected={localFilters.dateRange.endDate}
+                    onSelect={(date) => handleDateChange("endDate", date)}
                     initialFocus
                   />
                 </PopoverContent>
@@ -208,6 +256,7 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
             </div>
           </div>
 
+          {/* Transaction Type */}
           <div>
             <h3 className="text-base font-semibold mb-3">Transaction Type</h3>
             <div className="relative">
@@ -233,14 +282,13 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
                 <div className="mt-2 p-2 bg-white border-2 border-foreground rounded-xl space-y-1">
                   {[
                     {
-                      key: "storeTransactions" as const,
-                      label: "Store Transactions",
+                      key: "digitalProducts" as const,
+                      label: "Digital Products",
                     },
-                    { key: "getTipped" as const, label: "Get Tipped" },
+                    { key: "coffee" as const, label: "Coffee" },
+                    { key: "webinars" as const, label: "Webinars" },
                     { key: "withdrawals" as const, label: "Withdrawals" },
-                    { key: "chargebacks" as const, label: "Chargebacks" },
-                    { key: "cashbacks" as const, label: "Cashbacks" },
-                    { key: "referEarn" as const, label: "Refer & Earn" },
+                    { key: "other" as const, label: "Other" },
                   ].map(({ key, label }) => (
                     <div
                       key={key}
@@ -248,7 +296,7 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
                     >
                       <Checkbox
                         id={key}
-                        checked={transactionTypes[key]}
+                        checked={localFilters.transactionTypes[key]}
                         onCheckedChange={() => toggleTransactionType(key)}
                       />
                       <label
@@ -264,6 +312,7 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
             </div>
           </div>
 
+          {/* Transaction Status */}
           <div>
             <h3 className="text-base font-semibold mb-3">Transaction Status</h3>
             <div className="relative">
@@ -300,7 +349,7 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
                     >
                       <Checkbox
                         id={key}
-                        checked={transactionStatuses[key]}
+                        checked={localFilters.transactionStatuses[key]}
                         onCheckedChange={() => toggleTransactionStatus(key)}
                       />
                       <label
@@ -317,14 +366,22 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
           </div>
         </div>
 
-        <div className="p-6 border-t border-border flex items-center gap-4">
+        <div className="fbc gap-8">
           <button
             onClick={handleClear}
             className="flex-1 px-6 py-3 rounded-full text-sm font-medium border border-border hover:bg-muted transition-colors"
           >
             Clear
           </button>
-          <button className="flex-1 px-6 py-3 rounded-full text-sm font-medium bg-[#E5E5E5] text-[#A0A0A0] cursor-not-allowed">
+          <button
+            onClick={handleApply}
+            disabled={!hasChanges}
+            className={`flex-1 px-6 py-3 rounded-full text-sm font-medium transition-colors ${
+              hasChanges
+                ? "bg-foreground text-background hover:bg-foreground/90 cursor-pointer"
+                : "bg-[#E5E5E5] text-[#A0A0A0] cursor-not-allowed"
+            }`}
+          >
             Apply
           </button>
         </div>

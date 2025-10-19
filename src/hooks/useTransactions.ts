@@ -36,7 +36,7 @@ function transformTransaction(apiTx: ApiTransaction): Transaction {
     amount: apiTx.amount,
     date: formatDate(apiTx.date),
     status: apiTx.status === "successful" ? "success" : apiTx.status,
-    type: apiTx.type,
+    type: apiTx.metadata?.type || apiTx.type,
   };
 }
 

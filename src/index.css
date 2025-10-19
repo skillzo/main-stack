@@ -167,3 +167,20 @@
     @apply flex items-center;
   }
 }
+
+button,
+[role="button"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+a,
+[onclick],
+[tabindex]:not([tabindex="-1"]) {
+  cursor: pointer;
+}
+
+button:disabled,
+[disabled],
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}

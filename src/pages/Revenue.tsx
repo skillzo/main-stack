@@ -5,30 +5,35 @@ import { useWallet } from "@/hooks/useWallet";
 import { WalletBalanceChart } from "@/components/revenue/WalletBalanceChart";
 import { StatsGrid } from "@/components/revenue/StatsGrid";
 import { TransactionsList } from "@/components/revenue/TransactionsList";
+import { type FilterState, defaultFilterState } from "@/types/filter";
+import { filterTransactions } from "@/lib/filterUtils";
 
 export function Revenue() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterState>(defaultFilterState);
   const { transactions, loading, error } = useTransactions();
   const { wallet, loading: walletLoading, error: walletError } = useWallet();
 
-  const chartData = useMemo(() => {
-    if (!transactions.length) return [];
+  const filteredTransactions = useMemo(() => {
+    return filterTransactions(transactions, filters);
+  }, [transactions, filters]);
 
-    // Sort transactions by date (oldest first)
-    const sorted = [...transactions].sort((a, b) => {
+  const chartData = useMemo(() => {
+    if (!filteredTransactions.length) return [];
+
+    const sorted = [...filteredTransactions].sort((a, b) => {
       const dateA = new Date(a.date);
       const dateB = new Date(b.date);
       return dateA.getTime() - dateB.getTime();
     });
 
-    // Calculate running balance starting from 0
     let runningBalance = 0;
 
     const chartPoints = sorted.map((transaction) => {
-      if (transaction.type === "deposit") {
-        runningBalance += transaction.amount;
-      } else {
+      if (transaction.type === "withdrawal") {
         runningBalance -= transaction.amount;
+      } else {
+        runningBalance += transaction.amount;
       }
 
       const date = new Date(transaction.date);
@@ -45,13 +50,15 @@ export function Revenue() {
     });
 
     return chartPoints;
-  }, [transactions]);
+  }, [filteredTransactions]);
 
   return (
     <>
       <FilterDrawer
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
+        filters={filters}
+        onFiltersChange={setFilters}
       />
 
       <div className="p-8 bg-white min-h-full">
@@ -67,7 +74,7 @@ export function Revenue() {
           </div>
 
           <TransactionsList
-            transactions={transactions}
+            transactions={filteredTransactions}
             loading={loading}
             error={error}
             onFilterClick={() => setIsFilterOpen(true)}
