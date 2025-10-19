@@ -1,12 +1,3 @@
-import { Info } from "lucide-react";
-import {
-  AnalyticsIcon,
-  AppsIcon,
-  CRMIcon,
-  HomeIcon,
-  WalletIcon,
-} from "@/assets/svg";
-
 interface AppsDropdownProps {
   isOpen: boolean;
 }

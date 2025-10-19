@@ -24,7 +24,6 @@ export function useUser() {
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch user");
-        console.error("Error fetching user:", err);
       } finally {
         setLoading(false);
       }

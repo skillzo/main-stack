@@ -4,8 +4,6 @@ import { BASE_URL } from "@/lib/varaibles";
 
 const API_URL = `${BASE_URL}/transactions`;
 
-console.log("API_URL", BASE_URL);
-
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
   return date.toLocaleDateString("en-US", {
@@ -63,7 +61,6 @@ export function useTransactions() {
         setError(
           err instanceof Error ? err.message : "Failed to fetch transactions"
         );
-        console.error("Error fetching transactions:", err);
       } finally {
         setLoading(false);
       }

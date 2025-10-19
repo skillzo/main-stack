@@ -24,7 +24,6 @@ export function useWallet() {
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch wallet");
-        console.error("Error fetching wallet:", err);
       } finally {
         setLoading(false);
       }

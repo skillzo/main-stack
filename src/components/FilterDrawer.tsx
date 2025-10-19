@@ -163,9 +163,6 @@ export function FilterDrawer({
 
   const hasChanges = JSON.stringify(localFilters) !== JSON.stringify(filters);
 
-  console.log("localFilters", localFilters);
-  console.log("filters", filters);
-
   return (
     <>
       <div
