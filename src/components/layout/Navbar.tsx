@@ -1,6 +1,5 @@
 import { Bell, MessageSquareText, TextAlignJustify } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { AppsDropdown } from "../AppsDropdown";
 import { ProfileMenu } from "../ProfileMenu";
 import Logo from "../common/Logo";
 import {
@@ -10,19 +9,16 @@ import {
   HomeIcon,
   WalletIcon,
 } from "../../assets/svg";
+import { useUser } from "@/hooks/useUser";
 
 export function Navbar() {
-  const [isAppsOpen, setIsAppsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const appsRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const pathname = window.location.pathname;
+  const { user, loading, getInitials } = useUser();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (appsRef.current && !appsRef.current.contains(event.target as Node)) {
-        setIsAppsOpen(false);
-      }
       if (
         profileRef.current &&
         !profileRef.current.contains(event.target as Node)
@@ -31,14 +27,14 @@ export function Navbar() {
       }
     };
 
-    if (isAppsOpen || isProfileOpen) {
+    if (isProfileOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isAppsOpen, isProfileOpen]);
+  }, [isProfileOpen]);
 
   const navlinks = [
     {
@@ -107,7 +103,7 @@ export function Navbar() {
             onClick={() => setIsProfileOpen(!isProfileOpen)}
           >
             <div className="w-9 h-9 rounded-full bg-foreground text-background flex items-center justify-center text-sm font-medium">
-              OJ
+              {loading ? "..." : getInitials()}
             </div>
 
             <div className="relative " ref={profileRef}>
@@ -115,7 +111,11 @@ export function Navbar() {
                 <TextAlignJustify className="w-5 h-5" />
               </div>
 
-              <ProfileMenu isOpen={isProfileOpen} />
+              <ProfileMenu
+                isOpen={isProfileOpen}
+                user={user}
+                loading={loading}
+              />
             </div>
           </div>
         </div>

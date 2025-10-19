@@ -6,5 +6,5 @@ interface LogoProps {
 }
 
 export default function Logo({ className }: LogoProps) {
-  return <img src={logo} alt="Logo" className={cn("w-10 h-10", className)} />;
+  return <img src={logo} alt="Logo" className={cn("w-8 h-8", className)} />;
 }

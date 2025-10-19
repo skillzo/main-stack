@@ -7,13 +7,28 @@ import {
   UserCog,
   LogOut,
 } from "lucide-react";
+import type { User } from "@/types/api";
 
 interface ProfileMenuProps {
   isOpen: boolean;
+  user: User | null;
+  loading: boolean;
 }
 
-export function ProfileMenu({ isOpen }: ProfileMenuProps) {
+export function ProfileMenu({ isOpen, user, loading }: ProfileMenuProps) {
   if (!isOpen) return null;
+
+  const getInitials = () => {
+    if (!user) return "U";
+    return `${user.first_name.charAt(0)}${user.last_name.charAt(
+      0
+    )}`.toUpperCase();
+  };
+
+  const getFullName = () => {
+    if (!user) return "User";
+    return `${user.first_name} ${user.last_name}`;
+  };
 
   const menuItems = [
     { id: 1, icon: Settings, label: "Settings" },
@@ -28,17 +43,23 @@ export function ProfileMenu({ isOpen }: ProfileMenuProps) {
   return (
     <div className="absolute top-full right-0 mt-2 w-[320px] bg-white rounded-2xl shadow-xl border border-border py-6 z-50">
       <div className="px-6 pb-6 border-b border-border">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-foreground text-background flex items-center justify-center text-lg font-semibold">
-            OJ
+        {loading ? (
+          <div className="text-center py-4 text-muted-foreground">
+            Loading...
           </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-base">Olivier Jones</h3>
-            <p className="text-sm text-muted-foreground">
-              olivierjones@gmail.com
-            </p>
+        ) : (
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-foreground text-background flex items-center justify-center text-lg font-semibold">
+              {getInitials()}
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-base">{getFullName()}</h3>
+              <p className="text-sm text-muted-foreground">
+                {user?.email || "user@example.com"}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div className="mt-2">

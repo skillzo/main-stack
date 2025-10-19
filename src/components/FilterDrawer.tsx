@@ -1,5 +1,14 @@
-import { X, ChevronDown } from "lucide-react";
+import { X, ChevronDown, CalendarIcon } from "lucide-react";
 import { useState, useEffect } from "react";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { format } from "date-fns";
 
 interface FilterDrawerProps {
   isOpen: boolean;
@@ -12,8 +21,12 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
   const [selectedQuickFilter, setSelectedQuickFilter] = useState<string | null>(
     null
   );
-  const [startDate, setStartDate] = useState("17 Jul 2023");
-  const [endDate, setEndDate] = useState("17 Aug 2023");
+  const [startDate, setStartDate] = useState<Date | undefined>(
+    new Date("2023-07-17")
+  );
+  const [endDate, setEndDate] = useState<Date | undefined>(
+    new Date("2023-08-17")
+  );
   const [isTransactionTypeOpen, setIsTransactionTypeOpen] = useState(false);
   const [isTransactionStatusOpen, setIsTransactionStatusOpen] = useState(false);
 
@@ -50,6 +63,10 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
     setTransactionTypes((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const toggleTransactionStatus = (key: keyof typeof transactionStatuses) => {
+    setTransactionStatuses((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
   const getTransactionTypeLabel = () => {
     const selected = Object.entries(transactionTypes)
       .filter(([_, isSelected]) => isSelected)
@@ -68,6 +85,25 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
     return selected.length === 6
       ? "Store Transactions, Get Tipped, Withdrawals, Chargebacks, Ca..."
       : selected.join(", ");
+  };
+
+  const getTransactionStatusLabel = () => {
+    const selected = Object.entries(transactionStatuses)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([key]) => {
+        const labels: Record<string, string> = {
+          successful: "Successful",
+          pending: "Pending",
+          failed: "Failed",
+        };
+        return labels[key];
+      });
+
+    if (selected.length === 0) return "Select status";
+    if (selected.length === Object.keys(transactionStatuses).length)
+      return "All statuses";
+    if (selected.length <= 2) return selected.join(", ");
+    return `${selected.length} selected`;
   };
 
   const handleClear = () => {
@@ -96,12 +132,12 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
         onClick={onClose}
       />
       <div
-        className={`fixed right-0 top-0 h-full w-[560px] bg-white z-50 shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
+        className={`fixed p-6 right-2 top-1/2 -translate-y-1/2 h-[98%]  w-full  max-w-[560px] bg-white z-50 shadow-2xl flex flex-col transition-transform duration-300 ease-out rounded-xl ${
           isAnimating ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="p-6 border-b border-border flex items-center justify-between">
-          <h2 className="text-2xl font-semibold">Filter</h2>
+        <div className="fbc">
+          <h2 className="text-2xl font-bold">Filter</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-muted rounded-lg transition-colors"
@@ -110,16 +146,16 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
           </button>
         </div>
 
-        <div className="flex-1 overflow-auto p-6 space-y-6">
+        <div className="flex-1 overflow-auto space-y-6 mt-8">
           <div className="flex items-center gap-3">
             {quickFilters.map((filter) => (
               <button
                 key={filter}
                 onClick={() => setSelectedQuickFilter(filter)}
-                className={`px-5 py-2.5 rounded-full text-sm transition-colors ${
+                className={`px-5 py-2.5 border border-border rounded-full text-xs md:text-sm transition-colors cursor-pointer ${
                   selectedQuickFilter === filter
                     ? "bg-foreground text-background"
-                    : "bg-[#F5F5F5] text-foreground hover:bg-[#EBEBEB]"
+                    : "text-foreground hover:bg-[#EBEBEB]"
                 }`}
               >
                 {filter}
@@ -127,21 +163,48 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
             ))}
           </div>
 
-          <div>
+          <div className="">
             <h3 className="text-base font-semibold mb-3">Date Range</h3>
             <div className="grid grid-cols-2 gap-4">
-              <div className="relative">
-                <button className="w-full px-4 py-3 bg-[#F5F5F5] rounded-xl text-left text-sm flex items-center justify-between hover:bg-[#EBEBEB] transition-colors">
-                  {startDate}
-                  <ChevronDown className="w-4 h-4" />
-                </button>
-              </div>
-              <div className="relative">
-                <button className="w-full px-4 py-3 bg-[#F5F5F5] rounded-xl text-left text-sm flex items-center justify-between hover:bg-[#EBEBEB] transition-colors">
-                  {endDate}
-                  <ChevronDown className="w-4 h-4" />
-                </button>
-              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal bg-[#F5F5F5] border-none hover:bg-[#EBEBEB] rounded-xl px-4 py-3 h-auto"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {startDate ? format(startDate, "PPP") : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={startDate}
+                    onSelect={setStartDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal bg-[#F5F5F5] border-none hover:bg-[#EBEBEB] rounded-xl px-4 py-3 h-auto"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {endDate ? format(endDate, "PPP") : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={endDate}
+                    onSelect={setEndDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
@@ -179,41 +242,22 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
                     { key: "cashbacks" as const, label: "Cashbacks" },
                     { key: "referEarn" as const, label: "Refer & Earn" },
                   ].map(({ key, label }) => (
-                    <label
+                    <div
                       key={key}
-                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-muted rounded-lg cursor-pointer"
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-muted rounded-lg"
                     >
-                      <div
-                        className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${
-                          transactionTypes[key]
-                            ? "bg-foreground"
-                            : "bg-white border-2 border-foreground"
-                        }`}
-                      >
-                        {transactionTypes[key] && (
-                          <svg
-                            className="w-3.5 h-3.5 text-background"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={3}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        )}
-                      </div>
-                      <span className="text-sm">{label}</span>
-                      <input
-                        type="checkbox"
+                      <Checkbox
+                        id={key}
                         checked={transactionTypes[key]}
-                        onChange={() => toggleTransactionType(key)}
-                        className="sr-only"
+                        onCheckedChange={() => toggleTransactionType(key)}
                       />
-                    </label>
+                      <label
+                        htmlFor={key}
+                        className="text-sm cursor-pointer flex-1"
+                      >
+                        {label}
+                      </label>
+                    </div>
                   ))}
                 </div>
               )}
@@ -227,11 +271,48 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
                 onClick={() =>
                   setIsTransactionStatusOpen(!isTransactionStatusOpen)
                 }
-                className="w-full px-4 py-3 bg-[#F5F5F5] rounded-xl text-left text-sm flex items-center justify-between hover:bg-[#EBEBEB] transition-colors"
+                className={`w-full px-4 py-3 rounded-xl text-left text-sm flex items-center justify-between transition-all ${
+                  isTransactionStatusOpen
+                    ? "bg-white border-2 border-foreground"
+                    : "bg-[#F5F5F5] hover:bg-[#EBEBEB]"
+                }`}
               >
-                Successful, Pending, Failed
-                <ChevronDown className="w-4 h-4" />
+                <span className="truncate pr-2">
+                  {getTransactionStatusLabel()}
+                </span>
+                <ChevronDown
+                  className={`w-4 h-4 flex-shrink-0 transition-transform ${
+                    isTransactionStatusOpen ? "rotate-180" : ""
+                  }`}
+                />
               </button>
+
+              {isTransactionStatusOpen && (
+                <div className="mt-2 p-2 bg-white border-2 border-foreground rounded-xl space-y-1">
+                  {[
+                    { key: "successful" as const, label: "Successful" },
+                    { key: "pending" as const, label: "Pending" },
+                    { key: "failed" as const, label: "Failed" },
+                  ].map(({ key, label }) => (
+                    <div
+                      key={key}
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-muted rounded-lg"
+                    >
+                      <Checkbox
+                        id={key}
+                        checked={transactionStatuses[key]}
+                        onCheckedChange={() => toggleTransactionStatus(key)}
+                      />
+                      <label
+                        htmlFor={key}
+                        className="text-sm cursor-pointer flex-1"
+                      >
+                        {label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
