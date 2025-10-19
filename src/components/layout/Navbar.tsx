@@ -1,6 +1,27 @@
 import { Home, BarChart3, DollarSign, Users, Grid3x3 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { AppsDropdown } from "../AppsDropdown";
 
 export function Navbar() {
+  const [isAppsOpen, setIsAppsOpen] = useState(false);
+  const appsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (appsRef.current && !appsRef.current.contains(event.target as Node)) {
+        setIsAppsOpen(false);
+      }
+    };
+
+    if (isAppsOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isAppsOpen]);
+
   return (
     <nav className="border-b border-border bg-background px-6 py-3">
       <div className="flex items-center justify-between">
@@ -30,14 +51,39 @@ export function Navbar() {
               <Users className="w-4 h-4" />
               CRM
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground transition-colors">
-              <Grid3x3 className="w-4 h-4" />
-              Apps
-            </button>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <div className="relative" ref={appsRef}>
+            <button
+              onClick={() => setIsAppsOpen(!isAppsOpen)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm bg-foreground text-background hover:bg-foreground/90 transition-colors"
+            >
+              <Grid3x3 className="w-4 h-4" />
+              Apps
+            </button>
+
+            <AppsDropdown isOpen={isAppsOpen} />
+          </div>
+
+          <button className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm bg-foreground text-background hover:bg-foreground/90 transition-colors">
+            Link in Bio
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+
           <button className="p-2 hover:bg-muted rounded-lg transition-colors">
             <svg
               className="w-5 h-5"

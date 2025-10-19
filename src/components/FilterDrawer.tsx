@@ -1,5 +1,5 @@
 import { X, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface FilterDrawerProps {
   isOpen: boolean;
@@ -7,6 +7,8 @@ interface FilterDrawerProps {
 }
 
 export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const [selectedQuickFilter, setSelectedQuickFilter] = useState<string | null>(
     null
   );
@@ -30,7 +32,17 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
     failed: true,
   });
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true);
+      setTimeout(() => setIsAnimating(true), 10);
+    } else {
+      setIsAnimating(false);
+      setTimeout(() => setIsVisible(false), 300);
+    }
+  }, [isOpen]);
+
+  if (!isVisible) return null;
 
   const quickFilters = ["Today", "Last 7 days", "This month", "Last 3 months"];
 
@@ -77,8 +89,17 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/20 z-40" onClick={onClose} />
-      <div className="fixed right-0 top-0 h-full w-[560px] bg-white z-50 shadow-2xl flex flex-col">
+      <div
+        className={`fixed inset-0 bg-black/20 z-40 transition-opacity duration-300 ${
+          isAnimating ? "opacity-100" : "opacity-0"
+        }`}
+        onClick={onClose}
+      />
+      <div
+        className={`fixed right-0 top-0 h-full w-[560px] bg-white z-50 shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
+          isAnimating ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
         <div className="p-6 border-b border-border flex items-center justify-between">
           <h2 className="text-2xl font-semibold">Filter</h2>
           <button
