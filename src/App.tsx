@@ -1,10 +1,12 @@
-import './App.css'
+import { Layout } from "./components/layout/Layout";
+import { Revenue } from "./pages/Revenue";
 
 function App() {
-
   return (
-  <div>Hello World</div>
-  )
+    <Layout>
+      <Revenue />
+    </Layout>
+  );
 }
 
-export default App
+export default App;
